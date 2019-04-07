@@ -1,0 +1,40 @@
+[project]
+title = UDGJ Boss
+dependencies = https://github.com/britzl/defold-input/archive/1.5.3.zip,https://github.com/britzl/lumiere/archive/master.zip,https://github.com/britzl/defold-orthographic/archive/2.8.0.zip,https://github.com/britzl/monarch/archive/2.17.1.zip
+custom_resources = 
+
+[bootstrap]
+main_collection = /controller/controller.collectionc
+render = /lumiere/render/lumiere.renderc
+
+[input]
+game_binding = /in/bindings/all.input_bindingc
+gamepads = /in/gamepads/in.gamepadsc
+use_accelerometer = 0
+
+[display]
+width = 1136
+height = 640
+
+[script]
+shared_state = 1
+
+[ios]
+bundle_identifier = com.britzl.defold.2buttonjam
+infoplist = /builtins/manifests/ios/Info.plist
+
+[osx]
+bundle_identifier = com.britzl.defold.2buttonjam
+infoplist = /builtins/manifests/osx/Info.plist
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[android]
+package = com.britzl.defold.2buttonjam
+gcm_sender_id = 
+
+[physics]
+debug = 1
+

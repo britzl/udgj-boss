@@ -1,0 +1,36 @@
+image: "/assets/images/16x16_various.png"
+tile_width: 22
+tile_height: 22
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+animations {
+  id: "armor1"
+  start_tile: 17
+  end_tile: 17
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "helmet1"
+  start_tile: 9
+  end_tile: 9
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "shield1"
+  start_tile: 40
+  end_tile: 40
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 0
+inner_padding: 0

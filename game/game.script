@@ -1,0 +1,10 @@
+local lumiere = require "lumiere.lumiere"
+local program = require "render.program"
+local basic = require "render.basic"
+
+function init(self)
+	lumiere.add_program("game", program)
+	lumiere.add_program("basic", basic)
+
+	lumiere.use_program("basic")
+end

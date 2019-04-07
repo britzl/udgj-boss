@@ -1,0 +1,36 @@
+image: "/assets/images/16x16_misc.png"
+tile_width: 22
+tile_height: 22
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+animations {
+  id: "drop"
+  start_tile: 64
+  end_tile: 64
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "skull1"
+  start_tile: 145
+  end_tile: 145
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "skull2"
+  start_tile: 147
+  end_tile: 147
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 0
+inner_padding: 0
