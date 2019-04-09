@@ -1,6 +1,6 @@
 components {
-  id: "shield"
-  component: "/game/shield.script"
+  id: "skull"
+  component: "/game/bosses/enemy.script"
   position {
     x: 0.0
     y: 0.0
@@ -16,8 +16,8 @@ components {
 embedded_components {
   id: "sprite"
   type: "sprite"
-  data: "tile_set: \"/assets/armor.tilesource\"\n"
-  "default_animation: \"shield1\"\n"
+  data: "tile_set: \"/assets/misc.tilesource\"\n"
+  "default_animation: \"tiny_skull\"\n"
   "material: \"/builtins/materials/sprite.material\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
   ""
@@ -41,11 +41,11 @@ embedded_components {
   "mass: 0.0\n"
   "friction: 0.1\n"
   "restitution: 0.5\n"
-  "group: \"shield\"\n"
+  "group: \"enemy\"\n"
   "mask: \"weapon\"\n"
   "embedded_collision_shape {\n"
   "  shapes {\n"
-  "    shape_type: TYPE_BOX\n"
+  "    shape_type: TYPE_SPHERE\n"
   "    position {\n"
   "      x: 0.0\n"
   "      y: 0.0\n"
@@ -58,11 +58,9 @@ embedded_components {
   "      w: 1.0\n"
   "    }\n"
   "    index: 0\n"
-  "    count: 3\n"
+  "    count: 1\n"
   "  }\n"
-  "  data: 7.0\n"
-  "  data: 8.0\n"
-  "  data: 10.0\n"
+  "  data: 7.5\n"
   "}\n"
   "linear_damping: 0.0\n"
   "angular_damping: 0.0\n"

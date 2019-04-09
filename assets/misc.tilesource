@@ -15,6 +15,15 @@ animations {
   flip_vertical: 0
 }
 animations {
+  id: "large_sphere"
+  start_tile: 73
+  end_tile: 80
+  playback: PLAYBACK_ONCE_BACKWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
   id: "skull1"
   start_tile: 145
   end_tile: 145
@@ -27,6 +36,15 @@ animations {
   id: "skull2"
   start_tile: 147
   end_tile: 147
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "tiny_skull"
+  start_tile: 154
+  end_tile: 154
   playback: PLAYBACK_ONCE_FORWARD
   fps: 30
   flip_horizontal: 0

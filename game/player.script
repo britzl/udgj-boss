@@ -4,7 +4,7 @@ go.property("angular_speed", 50)
 
 local mapper = require "in.mapper"
 local state = require "in.state"
-
+local camera = require "orthographic.camera"
 
 local STRAFE_LEFT = hash("strafe_left")
 local STRAFE_RIGHT = hash("strafe_right")
@@ -13,6 +13,10 @@ local MOVE_BACKWARD = hash("move_backward")
 local ATTACK = hash("attack")
 
 local ZERO = vmath.vector3()
+
+local CAMERA_FOLLOW_OPTIONS = {
+	offset = vmath.vector3()
+}
 
 
 local function float(url, delay)
@@ -52,18 +56,18 @@ end
 function update(self, dt)
 	local pos = go.get_position()
 
+	local angle = math.atan2(pos.y, pos.x)
+	
 	local function strafe(dir)
 		local dist = vmath.length(pos - ZERO)
-		local a = math.atan2(pos.y, pos.x)
-		a = a + (math.rad(self.angular_speed * dt) / (dist * 0.01)) * dir
+		local a = angle + (math.rad(self.angular_speed * dt) / (dist * 0.01)) * dir
 		pos.x = dist * math.cos(a)
 		pos.y = dist * math.sin(a)
 	end
 
 	local function move(dir)
-		local a = math.atan2(pos.y, pos.x)
-		pos.x = pos.x - math.cos(a) * self.linear_speed * dt * dir
-		pos.y = pos.y - math.sin(a) * self.linear_speed * dt * dir
+		pos.x = pos.x - math.cos(angle) * self.linear_speed * dt * dir
+		pos.y = pos.y - math.sin(angle) * self.linear_speed * dt * dir
 	end
 		
 	if self.state.is_pressed(MOVE_FORWARD) then
@@ -77,8 +81,13 @@ function update(self, dt)
 		strafe(1)
 	end
 
-	local a = math.atan2(pos.y, pos.x)
-	go.set_rotation(vmath.quat_rotation_z(a + math.rad(90)), "weapon")
+	-- adjust camera offset
+	CAMERA_FOLLOW_OPTIONS.offset.x = math.cos(angle) * -200
+	CAMERA_FOLLOW_OPTIONS.offset.y = math.sin(angle) * -100
+	camera.follow(hash("/camera"), go.get_id(), CAMERA_FOLLOW_OPTIONS)
+
+	-- rotate weapon
+	go.set_rotation(vmath.quat_rotation_z(angle + math.rad(90)), "weapon")
 
 	go.set_position(pos)
 end

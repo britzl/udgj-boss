@@ -81,8 +81,8 @@ collection_instances {
   id: "player"
   collection: "/game/player.collection"
   position {
-    x: -82.0
-    y: -77.0
+    x: -201.0
+    y: -143.0
     z: 1.0
   }
   rotation {
@@ -99,7 +99,7 @@ collection_instances {
 }
 collection_instances {
   id: "shieldboss"
-  collection: "/game/shieldboss.collection"
+  collection: "/game/bosses/boss.collection"
   position {
     x: 0.0
     y: -5.0
@@ -209,6 +209,41 @@ embedded_instances {
   position {
     x: 74.0
     y: 163.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "ui"
+  data: "components {\n"
+  "  id: \"hud\"\n"
+  "  component: \"/game/hud.gui\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 0.0
+    y: 0.0
     z: 0.0
   }
   rotation {

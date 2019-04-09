@@ -1,0 +1,11 @@
+local boss = require "game.bosses.boss"
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.group == hash("weapon") then
+			boss.OBJECT_DESTROYED.trigger(go.get_id())
+			go.delete()
+			go.delete(message.other_id)
+		end
+	end
+end

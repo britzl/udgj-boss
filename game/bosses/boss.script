@@ -1,0 +1,32 @@
+local boss = require "game.bosses.boss"
+local testboss = require "game.bosses.testboss"
+
+function init(self)
+	self.boss_co = coroutine.create(testboss.run)
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	local ok, err = coroutine.resume(self.boss_co)
+	if not ok then
+		print(err)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.group == hash("weapon") then
+			go.delete(message.other_id)
+			particlefx.play("#hit")
+		end
+	end
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Remove this function if not needed
+end
