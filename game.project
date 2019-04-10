@@ -36,5 +36,5 @@ package = com.britzl.defold.2buttonjam
 gcm_sender_id = 
 
 [physics]
-debug = 1
+debug = 0
 

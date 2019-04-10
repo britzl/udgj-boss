@@ -24,14 +24,21 @@ local function float(url, delay)
 	go.animate(url, "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 3, go.EASING_INOUTQUAD, 1, delay)
 end
 
-local function attack(self)
-	local id = factory.create("#weaponfactory")
+local function position(id, angle, distance)
 	local pos = go.get_position(id)
-	local dist = vmath.length(pos - ZERO)
-	local a = math.atan2(pos.y, pos.x)
-	go.set_rotation(vmath.quat_rotation_z(a + math.rad(90)), id)
+	pos.x = distance * math.cos(angle)
+	pos.y = distance * math.sin(angle)
 	go.set_position(pos, id)
-		go.animate(id, "position", go.PLAYBACK_ONCE_FORWARD, ZERO, go.EASING_INQUAD, dist / 400, 0, function()
+end
+
+local function attack(self)
+	local player_pos = go.get_position()
+	local angle = math.atan2(player_pos.y, player_pos.x)
+	local pos = player_pos + vmath.vector3(-28 * math.cos(angle), -28 * math.sin(angle), 0)
+	local rot = vmath.quat_rotation_z(angle + math.rad(90))
+	local id = factory.create("#weaponfactory", pos, rot)
+	local dist = vmath.length(pos - ZERO)
+	go.animate(id, "position", go.PLAYBACK_ONCE_FORWARD, ZERO, go.EASING_INQUAD, dist / 600, 0, function()
 		go.delete(id)
 	end)
 end

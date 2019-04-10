@@ -10,6 +10,7 @@ function PRG.update(self, dt)
 	lumiere.clear(lumiere.BLACK)
 	lumiere.use_world_projection()
 	lumiere.draw_graphics2d()
+	render.draw_debug3d()
 	lumiere.use_screen_projection()
 	lumiere.draw_gui()
 end
