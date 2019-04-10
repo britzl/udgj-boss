@@ -5,6 +5,7 @@ go.property("angular_speed", 50)
 local mapper = require "in.mapper"
 local state = require "in.state"
 local camera = require "orthographic.camera"
+local utils = require "game.utils"
 
 local STRAFE_LEFT = hash("strafe_left")
 local STRAFE_RIGHT = hash("strafe_right")
@@ -14,15 +15,14 @@ local ATTACK = hash("attack")
 
 local ZERO = vmath.vector3()
 
+local CAMERA = hash("/camera")
+
 local CAMERA_FOLLOW_OPTIONS = {
 	offset = vmath.vector3()
 }
 
+local MAX_HEALTH = 10
 
-local function float(url, delay)
-	local pos = go.get_position(url)
-	go.animate(url, "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 3, go.EASING_INOUTQUAD, 1, delay)
-end
 
 local function position(id, angle, distance)
 	local pos = go.get_position(id)
@@ -43,12 +43,41 @@ local function attack(self)
 	end)
 end
 
+local function send_to_hud(message_id, message)
+	msg.post("/ui", message_id, message)
+end
+
+local function update_health(self, health)
+	self.health = math.min(health, MAX_HEALTH)
+	send_to_hud("player_health", { health = self.health, max = MAX_HEALTH })
+end
+
+local function take_damage(self)
+	update_health(self, self.health - 1)
+	self.enabled = false
+	msg.post("#collisionobject", "disable")
+	utils.blink("helmet", 2, 0.4)
+	utils.blink("armor", 2, 0.4)
+	camera.shake(CAMERA, 0.0025, 0.2)
+	local pos = go.get_position()
+	local angle = math.atan2(pos.y, pos.x)
+	local to = go.get_position() + vmath.vector3(math.cos(angle) * 40, math.sin(angle) * 40, 0)
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, to, go.EASING_OUTQUAD, 0.4, 0, function()
+		if self.health == 0 then
+			print("dead")
+		else
+			msg.post("#collisionobject", "enable")
+			self.enabled = true
+		end
+	end)
+end
+
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	ZERO.z = go.get_position().z
 	
-	float("helmet", 0.1)
-	float("armor", 0)
+	utils.float("helmet", 0.1)
+	utils.float("armor", 0)
 
 	mapper.bind(mapper.KEY_LEFT, STRAFE_LEFT, self.player_id)
 	mapper.bind(mapper.KEY_RIGHT, STRAFE_RIGHT, self.player_id)
@@ -57,12 +86,15 @@ function init(self)
 	mapper.bind(mapper.KEY_SPACE, ATTACK, self.player_id)
 
 	self.state = state.create()
+	self.enabled = true
+	update_health(self, 10)
 end
 
 
 function update(self, dt)
+	if not self.enabled then return end
+	
 	local pos = go.get_position()
-
 	local angle = math.atan2(pos.y, pos.x)
 	
 	local function strafe(dir)
@@ -91,7 +123,7 @@ function update(self, dt)
 	-- adjust camera offset
 	CAMERA_FOLLOW_OPTIONS.offset.x = math.cos(angle) * -200
 	CAMERA_FOLLOW_OPTIONS.offset.y = math.sin(angle) * -100
-	camera.follow(hash("/camera"), go.get_id(), CAMERA_FOLLOW_OPTIONS)
+	camera.follow(CAMERA, go.get_id(), CAMERA_FOLLOW_OPTIONS)
 
 	-- rotate weapon
 	go.set_rotation(vmath.quat_rotation_z(angle + math.rad(90)), "weapon")
@@ -100,13 +132,20 @@ function update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	-- Add message-handling code here
-	-- Remove this function if not needed
+	if message_id == hash("collision_response") then
+		if message.group == hash("shield") then
+			take_damage(self)
+		elseif message.group == hash("enemy") then
+			take_damage(self)
+		end
+	end
 end
 
 function on_input(self, action_id, action)
 	action_id = mapper.on_input(action_id, self.player_id)
 	self.state.on_input(action_id, action)
+	if not self.enabled then return end
+
 	if action_id == ATTACK and action.released then
 		attack(self)
 	end

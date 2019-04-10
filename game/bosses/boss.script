@@ -1,8 +1,20 @@
 local boss = require "game.bosses.boss"
 local testboss = require "game.bosses.testboss"
 
+local MAX_HEALTH = 10
+
+local function send_to_hud(message_id, message)
+	msg.post("/ui", message_id, message)
+end
+
+local function update_health(self, health)
+	self.health = math.max(0, math.min(health, MAX_HEALTH))
+	send_to_hud("boss_health", { health = self.health, max = MAX_HEALTH })
+end
+
 function init(self)
 	self.boss_co = coroutine.create(testboss.run)
+	update_health(self, 10)
 end
 
 function final(self)
@@ -22,6 +34,7 @@ function on_message(self, message_id, message, sender)
 		if message.group == hash("weapon") then
 			go.delete(message.other_id)
 			particlefx.play("#hit")
+			update_health(self, self.health - 1)
 		end
 	end
 end

@@ -1,0 +1,51 @@
+local function update_player_health(self, health)
+	if health > #self.player_health then
+		for i=#self.player_health+1,health do
+			local box = gui.new_box_node(vmath.vector3(), vmath.vector3())
+			gui.set_size_mode(box, gui.SIZE_MODE_AUTO)
+			gui.set_texture(box, "ui")
+			gui.play_flipbook(box, "heart")
+			gui.set_parent(box, self.player_health_bg)
+			self.player_health[#self.player_health + 1] = box
+		end
+		for i=1,#self.player_health do
+			local box = self.player_health[i]
+			local pos = vmath.vector3((i - 1) * 12, 0, 0)
+			gui.set_position(box, pos)
+		end
+	elseif health < #self.player_health then
+		for i=#self.player_health,health,-1 do
+			gui.delete_node(self.player_health[i])
+			self.player_health[i] = nil
+		end
+	end
+end
+
+local function update_health_bar(bar, health, max)
+	local size = gui.get_size(bar)
+	size.x = 6 + 38 * health / max
+	gui.set_size(bar, size)
+end
+
+local function update_boss_health(health, max)
+	local bar = gui.get_node("boss_health/bar")
+	update_health_bar(bar, health, max)
+end
+
+local function update_player_health(health, max)
+	local bar = gui.get_node("player_health/bar")
+	update_health_bar(bar, health, max)
+end
+
+function init(self)
+	update_player_health(1, 1)
+	update_boss_health(1, 1)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("player_health") then
+		update_player_health(message.health, message.max)
+	elseif message_id == hash("boss_health") then
+		update_boss_health(message.health, message.max)
+	end
+end
