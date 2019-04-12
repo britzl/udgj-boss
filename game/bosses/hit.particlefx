@@ -17,7 +17,7 @@ emitters {
   tile_source: "/assets/misc.tilesource"
   animation: "large_sphere"
   material: "/builtins/materials/particlefx.material"
-  blend_mode: BLEND_MODE_ALPHA
+  blend_mode: BLEND_MODE_ADD
   particle_orientation: PARTICLE_ORIENTATION_DEFAULT
   inherit_velocity: 0.0
   max_particle_count: 10
@@ -214,6 +214,12 @@ emitters {
     points {
       x: 0.0
       y: 1.0
+      t_x: 1.0
+      t_y: 0.0
+    }
+    points {
+      x: 1.0
+      y: -0.021276595
       t_x: 1.0
       t_y: 0.0
     }

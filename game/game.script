@@ -1,11 +1,21 @@
-local lumiere = require "lumiere.lumiere"
-local program = require "render.program"
-local basic = require "render.basic"
+local monarch = require "monarch.monarch"
 
 function init(self)
-	lumiere.add_program("game", program)
-	lumiere.add_program("basic", basic)
-
-	lumiere.use_program("basic")
 	--particlefx.play("rain")
+	local data = monarch.data("game")
+	local level = data and data.level or 1
+	local pos = vmath.vector3(0, 0, 2)
+	local props = {
+		[hash("/boss")] = { level = level }
+	}
+	self.boss = collectionfactory.create("#bossfactory", pos, nil, props)
+end
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("boss_dead") then
+		local data = monarch.data("game")
+		local level = data and data.level or 1
+		monarch.show("game", { clear = true, reload = true }, { level = level + 1})
+	end
 end

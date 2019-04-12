@@ -1,3 +1,18 @@
+components {
+  id: "weapon"
+  component: "/game/weapon.script"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+}
 embedded_components {
   id: "sprite"
   type: "sprite"
@@ -30,6 +45,7 @@ embedded_components {
   "mask: \"boss\"\n"
   "mask: \"enemy\"\n"
   "mask: \"shield\"\n"
+  "mask: \"bullet\"\n"
   "embedded_collision_shape {\n"
   "  shapes {\n"
   "    shape_type: TYPE_SPHERE\n"

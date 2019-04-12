@@ -6,6 +6,15 @@ tile_spacing: 0
 collision: ""
 material_tag: "tile"
 animations {
+  id: "shuriken1"
+  start_tile: 178
+  end_tile: 178
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
   id: "sword1"
   start_tile: 18
   end_tile: 18

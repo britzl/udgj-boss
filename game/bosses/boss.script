@@ -1,5 +1,6 @@
-local boss = require "game.bosses.boss"
-local testboss = require "game.bosses.testboss"
+go.property("level", 1)
+
+local bosses = require "game.bosses.bosses"
 
 local MAX_HEALTH = 10
 
@@ -10,10 +11,14 @@ end
 local function update_health(self, health)
 	self.health = math.max(0, math.min(health, MAX_HEALTH))
 	send_to_hud("boss_health", { health = self.health, max = MAX_HEALTH })
+	if self.health == 0 then
+		msg.post("/game", "boss_dead")
+	end
 end
 
 function init(self)
-	self.boss_co = coroutine.create(testboss.run)
+	local boss = bosses.get(self.level)
+	self.boss_co = coroutine.create(boss)
 	update_health(self, 10)
 end
 

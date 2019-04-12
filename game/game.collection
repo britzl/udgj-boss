@@ -82,27 +82,7 @@ collection_instances {
   collection: "/game/player.collection"
   position {
     x: -307.0
-    y: -192.0
-    z: 1.0
-  }
-  rotation {
-    x: 0.0
     y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-collection_instances {
-  id: "shieldboss"
-  collection: "/game/bosses/boss.collection"
-  position {
-    x: 0.0
-    y: -5.0
     z: 1.0
   }
   rotation {
@@ -123,6 +103,24 @@ embedded_instances {
   data: "components {\n"
   "  id: \"game\"\n"
   "  component: \"/game/game.script\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"bossfactory\"\n"
+  "  type: \"collectionfactory\"\n"
+  "  data: \"prototype: \\\"/game/bosses/boss.collection\\\"\\n"
+  "load_dynamically: false\\n"
+  "\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"
@@ -207,8 +205,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 74.0
-    y: 163.0
+    x: 0.0
+    y: 425.0
     z: 0.0
   }
   rotation {

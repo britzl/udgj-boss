@@ -20,12 +20,15 @@ local function position(id, angle, distance)
 end
 
 
-local function spawn(factory_url, count, distance, offset)
+local function spawn(factory_url, anim, count, distance, offset)
 	local instances = {}
 	for i=1,count do
 		local angle = offset + math.rad(i * 360 / count)
 		local pos = vmath.vector3(math.cos(angle) * distance, math.sin(angle) * distance, 0)
 		local id = factory.create(factory_url, pos)
+		if anim then
+			sprite.play_flipbook(msg.url(nil, id, "sprite"), anim)
+		end
 		go.set_parent(id, go.get_id())
 		instances[id] = { id = id, angle = angle, distance = distance }
 	end
@@ -39,10 +42,11 @@ local function create_property()
 end
 
 
-function M.create_wave(factory_url, count, distance, offset, fn)
+function M.create_wave(factory_url, anim, count, distance, offset, fn)
 	local wave = {
-		objects = spawn(factory_url, count, distance, offset),
+		objects = spawn(factory_url, anim, count, distance, offset),
 		rotation = create_property(),
+		strafe = create_property(),
 		distance = create_property(),
 	}
 	function wave.on_object_destroyed(id)
@@ -62,10 +66,43 @@ function M.create_wave(factory_url, count, distance, offset, fn)
 end
 
 
+function M.create_spawner(interval, factory_url, anim, count, distance, offset, fn)
+	local spawner = {
+		waves = {},
+	}
+	spawner.timer_handle = timer.delay(interval, true, function(self, handle, time_elapsed)
+		local wave = M.create_wave(factory_url, anim, count, distance, offset, function(wave)
+			fn(wave)
+			M.destroy_wave(wave)
+			spawner.waves[wave] = nil
+		end)
+		spawner.waves[wave] = true
+	end)
+	
+	return spawner
+end
+
+function M.update_spawner(spawner)
+	for wave,_ in pairs(spawner.waves) do
+		M.update_wave(wave)
+	end
+end
+
+function M.destroy_spawner(spawner)
+	for wave,_ in pairs(spawner.waves) do
+		M.destroy_wave(wave)
+	end
+end
+
+
 function M.animate_wave(wave, config, duration, delay)
 	assert(coroutine.running(), "You must run this from within a coroutine")
+	config.strafe = config.strafe or {}
 	config.rotate = config.rotate or {}
 	config.move = config.move or {}
+	local strafe_amount = config.strafe.amount or 0
+	local strafe_easing = config.strafe.easing or go.EASING_LINEAR
+	local strafe_playback = config.strafe.playback or go.PLAYBACK_ONCE_FORWARD
 	local rotate_amount = config.rotate.amount or 0
 	local rotate_easing = config.rotate.easing or go.EASING_LINEAR
 	local rotate_playback = config.rotate.playback or go.PLAYBACK_ONCE_FORWARD
@@ -74,6 +111,10 @@ function M.animate_wave(wave, config, duration, delay)
 	local move_playback = config.move.playback or go.PLAYBACK_ONCE_FORWARD
 
 	local done = false
+	local strafe_to = go.get(wave.strafe, "property") + strafe_amount
+	go.animate(wave.strafe, "property", strafe_playback, strafe_to, strafe_easing, duration, delay or 0, function()
+		done = true
+	end)
 	local rotate_to = go.get(wave.rotation, "property") + rotate_amount
 	go.animate(wave.rotation, "property", rotate_playback, rotate_to, rotate_easing, duration, delay or 0, function()
 		done = true
@@ -83,10 +124,11 @@ function M.animate_wave(wave, config, duration, delay)
 		done = true
 	end)
 	while not done do
-		local angle = math.rad(go.get(wave.rotation, "property"))
+		local angle = math.rad(go.get(wave.strafe, "property"))
 		local distance = go.get(wave.distance, "property")
 		for id,object in pairs(wave.objects) do
 			position(id, object.angle + angle, object.distance + distance)
+			go.set(id, "euler.z", go.get(wave.rotation, "property"))
 		end
 		coroutine.yield()
 	end
