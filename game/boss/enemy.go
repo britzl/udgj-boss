@@ -1,8 +1,38 @@
+components {
+  id: "hit"
+  component: "/game/boss/hit.particlefx"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+}
+components {
+  id: "destroy"
+  component: "/game/boss/destroy.particlefx"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+}
 embedded_components {
   id: "sprite"
   type: "sprite"
-  data: "tile_set: \"/assets/weapons.tilesource\"\n"
-  "default_animation: \"shuriken1\"\n"
+  data: "tile_set: \"/assets/misc.tilesource\"\n"
+  "default_animation: \"tiny_skull\"\n"
   "material: \"/builtins/materials/sprite.material\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
   ""
@@ -26,9 +56,9 @@ embedded_components {
   "mass: 0.0\n"
   "friction: 0.1\n"
   "restitution: 0.5\n"
-  "group: \"bullet\"\n"
-  "mask: \"player\"\n"
+  "group: \"enemy\"\n"
   "mask: \"weapon\"\n"
+  "mask: \"player\"\n"
   "embedded_collision_shape {\n"
   "  shapes {\n"
   "    shape_type: TYPE_SPHERE\n"
@@ -46,7 +76,7 @@ embedded_components {
   "    index: 0\n"
   "    count: 1\n"
   "  }\n"
-  "  data: 6.0\n"
+  "  data: 7.5\n"
   "}\n"
   "linear_damping: 0.0\n"
   "angular_damping: 0.0\n"

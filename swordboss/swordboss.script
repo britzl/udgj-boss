@@ -5,6 +5,7 @@ local basic = require "render.basic"
 local monarch = require "monarch.monarch"
 
 function init(self)
+	math.randomseed(os.time()) math.random() math.random() math.random()
 	msg.post(".", "acquire_input_focus")
 	lumiere.add_program("game", program)
 	lumiere.add_program("basic", basic)

@@ -1,10 +1,10 @@
-name: "default"
+name: "game"
 instances {
   id: "camera"
   prototype: "/orthographic/camera.go"
   position {
-    x: 243.0
-    y: 127.0
+    x: -307.0
+    y: 0.0
     z: 0.0
   }
   rotation {
@@ -77,11 +77,31 @@ instances {
     z: 1.0
   }
 }
+instances {
+  id: "sounds"
+  prototype: "/game/sounds.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
 collection_instances {
   id: "player"
-  collection: "/game/player.collection"
+  collection: "/game/player/player.collection"
   position {
-    x: -307.0
+    x: -300.0
     y: 0.0
     z: 1.0
   }
@@ -118,7 +138,7 @@ embedded_instances {
   "embedded_components {\n"
   "  id: \"bossfactory\"\n"
   "  type: \"collectionfactory\"\n"
-  "  data: \"prototype: \\\"/game/bosses/boss.collection\\\"\\n"
+  "  data: \"prototype: \\\"/game/boss/boss.collection\\\"\\n"
   "load_dynamically: false\\n"
   "\"\n"
   "  position {\n"

@@ -1,11 +1,6 @@
-embedded_components {
-  id: "sprite"
-  type: "sprite"
-  data: "tile_set: \"/assets/armor.tilesource\"\n"
-  "default_animation: \"shield1\"\n"
-  "material: \"/builtins/materials/sprite.material\"\n"
-  "blend_mode: BLEND_MODE_ALPHA\n"
-  ""
+components {
+  id: "weapon"
+  component: "/game/player/weapon.script"
   position {
     x: 0.0
     y: 0.0
@@ -19,6 +14,26 @@ embedded_components {
   }
 }
 embedded_components {
+  id: "sprite"
+  type: "sprite"
+  data: "tile_set: \"/assets/weapons.tilesource\"\n"
+  "default_animation: \"sword1\"\n"
+  "material: \"/builtins/materials/sprite.material\"\n"
+  "blend_mode: BLEND_MODE_ALPHA\n"
+  ""
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: -0.38268343
+    w: 0.9238795
+  }
+}
+embedded_components {
   id: "collisionobject"
   type: "collisionobject"
   data: "collision_shape: \"\"\n"
@@ -26,15 +41,17 @@ embedded_components {
   "mass: 0.0\n"
   "friction: 0.1\n"
   "restitution: 0.5\n"
-  "group: \"shield\"\n"
-  "mask: \"weapon\"\n"
-  "mask: \"player\"\n"
+  "group: \"weapon\"\n"
+  "mask: \"boss\"\n"
+  "mask: \"enemy\"\n"
+  "mask: \"shield\"\n"
+  "mask: \"bullet\"\n"
   "embedded_collision_shape {\n"
   "  shapes {\n"
-  "    shape_type: TYPE_BOX\n"
+  "    shape_type: TYPE_SPHERE\n"
   "    position {\n"
   "      x: 0.0\n"
-  "      y: 0.0\n"
+  "      y: 6.0\n"
   "      z: 0.0\n"
   "    }\n"
   "    rotation {\n"
@@ -44,11 +61,9 @@ embedded_components {
   "      w: 1.0\n"
   "    }\n"
   "    index: 0\n"
-  "    count: 3\n"
+  "    count: 1\n"
   "  }\n"
-  "  data: 7.0\n"
-  "  data: 8.0\n"
-  "  data: 10.0\n"
+  "  data: 5.0\n"
   "}\n"
   "linear_damping: 0.0\n"
   "angular_damping: 0.0\n"

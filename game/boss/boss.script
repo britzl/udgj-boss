@@ -1,0 +1,58 @@
+go.property("boss_id", hash(""))
+
+local bosses = require "game.boss.bosses"
+local boss = require "game.boss.boss"
+local MAX_HEALTH = 10
+
+local function send_to_hud(message_id, message)
+	msg.post("/ui", message_id, message)
+end
+
+local function update_health(self, boss)
+	send_to_hud("boss_health", { health = boss.health, max = boss.max_health })
+	if boss.health == 0 then
+		self.active = false
+		particlefx.play("#destroy")
+		msg.post("head", "disable")
+		msg.post("#", "dead")
+	end
+end
+
+function init(self)
+	self.boss = bosses.create(self.boss_id)
+	update_health(self, self.boss)
+	self.active = false
+end
+
+function update(self, dt)
+	if self.active then
+		boss.update(self.boss)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") then
+		if message.group == hash("weapon") then
+			go.delete(message.other_id)
+			if self.boss.health > 0 then
+				particlefx.play("#hit")
+				self.boss.health = math.max(0, self.boss.health - 1)
+				msg.post("/sounds", "play", { sound = "hurt" })
+				update_health(self, self.boss)
+			end
+		end
+	elseif message_id == hash("start") then
+		self.active = true
+		boss.run(self.boss)
+	elseif message_id == hash("dead") then
+		boss.destroy(self.boss)
+		timer.delay(2, false, function()
+			msg.post("/game", "boss_dead")
+		end)
+	end
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Remove this function if not needed
+end

@@ -1,6 +1,6 @@
 components {
   id: "script"
-  component: "/game/bosses/property.script"
+  component: "/game/boss/property.script"
   position {
     x: 0.0
     y: 0.0

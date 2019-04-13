@@ -1,0 +1,26 @@
+--local ATTACK = { "#attack1", "#attack2", "#attack3" }
+local SOUNDS = {
+	attack = {
+		gain = 1.0,
+		sounds = { "#attack1", "#attack2", "#attack3" }
+	},
+	hurt = {
+		gain = 1.0,
+		sounds = { "#hurt1", "#hurt2", "#hurt3" }
+	},
+	music = { 
+		gain = 1.0,
+		sounds = { "#music" }
+	}
+}
+
+local function play_random(group)
+	local url = group.sounds[math.random(1, #group.sounds)]
+	sound.play(url, { gain = group.gain })
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("play") then
+		play_random(SOUNDS[message.sound])
+	end
+end

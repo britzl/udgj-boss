@@ -6,6 +6,95 @@ M.OBJECT_HIT = signal.create("OBJECT_HIT")
 M.OBJECT_DESTROYED = signal.create("OBJECT_DESTROYED")
 
 
+local function update_spawner(spawner)
+end
+
+local function update_wave(wave)
+	local ok, err = coroutine.resume(wave.co)
+	if not ok then
+		print(err)
+	end
+end
+
+local function destroy_wave(boss, wave)
+	for i,w in pairs(boss.waves) do
+		if wave == w then
+			boss.waves[i] = nil
+			break
+		end
+	end
+	M.OBJECT_DESTROYED.remove(wave.on_object_destroyed)
+	go.cancel_animations(wave.rotation, "property")
+	go.cancel_animations(wave.strafe, "property")
+	go.cancel_animations(wave.distance, "property")
+	go.delete(wave.rotation)
+	go.delete(wave.strafe)
+	go.delete(wave.distance)
+
+	for object_id,_ in pairs(wave.objects) do
+		msg.post(msg.url(nil, object_id, "sprite"), "disable")
+		particlefx.play(msg.url(nil, object_id, "destroy"), function(self, id, emitter, state)
+			if state == particlefx.EMITTER_STATE_SLEEPING then
+				go.delete(object_id)
+			end
+		end)
+	end
+end
+
+local function destroy_spawner(boss, spawner)
+	for i,s in pairs(boss.spawners) do
+		if spawner == s then
+			boss.spawners[i] = nil
+			break
+		end
+	end
+	timer.cancel(spawner.timer_handle)
+end
+
+function M.create(health)
+	local boss = {
+		waves = {},
+		spawners = {},
+		health = health,
+		max_health = health,
+	}
+	return boss
+end
+
+
+function M.run(boss)
+	boss.co = coroutine.create(function()
+		while boss.health > 0 do
+			for _,wave in ipairs(boss.waves) do
+				update_wave(wave)
+			end
+			for _,spawner in ipairs(boss.spawners) do
+				update_spawner(spawner)
+			end
+			coroutine.yield()
+		end
+	end)
+end
+
+function M.update(boss)
+	local status = coroutine.status(boss.co)
+	if status == "suspended" then
+		local ok, err = coroutine.resume(boss.co)
+		if not ok then
+			print(err)
+		end
+	end
+end
+
+function M.destroy(boss)
+	while #boss.waves > 0 do
+		destroy_wave(boss, boss.waves[#boss.waves])
+	end
+	while #boss.spawners > 0 do
+		destroy_spawner(boss, boss.spawners[#boss.spawners])
+	end
+end
+
 function M.float(url, delay)
 	local pos = go.get_position(url)
 	go.animate(url, "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 3, go.EASING_INOUTQUAD, 1, delay)
@@ -42,7 +131,7 @@ local function create_property()
 end
 
 
-function M.create_wave(factory_url, anim, count, distance, offset, fn)
+function M.create_wave(boss, factory_url, anim, count, distance, offset, fn)
 	local wave = {
 		objects = spawn(factory_url, anim, count, distance, offset),
 		rotation = create_property(),
@@ -62,36 +151,21 @@ function M.create_wave(factory_url, anim, count, distance, offset, fn)
 			end
 		end
 	end)
+	boss.waves[#boss.waves + 1] = wave
 	return wave
 end
 
 
-function M.create_spawner(interval, factory_url, anim, count, distance, offset, fn)
-	local spawner = {
-		waves = {},
-	}
+function M.create_spawner(boss, interval, factory_url, anim, count, distance, offset, fn)
+	local spawner = {}
 	spawner.timer_handle = timer.delay(interval, true, function(self, handle, time_elapsed)
-		local wave = M.create_wave(factory_url, anim, count, distance, offset, function(wave)
+		local wave = M.create_wave(boss, factory_url, anim, count, distance, offset, function(wave)
 			fn(wave)
-			M.destroy_wave(wave)
-			spawner.waves[wave] = nil
+			destroy_wave(wave)
 		end)
-		spawner.waves[wave] = true
 	end)
-	
+	boss.spawners[#boss.spawners + 1] = spawner
 	return spawner
-end
-
-function M.update_spawner(spawner)
-	for wave,_ in pairs(spawner.waves) do
-		M.update_wave(wave)
-	end
-end
-
-function M.destroy_spawner(spawner)
-	for wave,_ in pairs(spawner.waves) do
-		M.destroy_wave(wave)
-	end
 end
 
 
@@ -134,21 +208,8 @@ function M.animate_wave(wave, config, duration, delay)
 	end
 end
 
-function M.update_wave(wave)
-	local ok, err = coroutine.resume(wave.co)
-	if not ok then
-		print(err)
-	end
-end
 
 
-
-function M.destroy_wave(wave)
-	M.OBJECT_DESTROYED.remove(wave.on_object_destroyed)
-	for id,_ in pairs(wave.objects) do go.delete(id) end
-	go.delete(wave.rotation)
-	go.delete(wave.distance)
-end
 
 
 return M

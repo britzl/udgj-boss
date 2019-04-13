@@ -1,18 +1,8 @@
 local monarch = require "monarch.monarch"
+local utils = require "swordboss.utils"
 
 function init(self)
-	local upper = true
-	local text = "SWORD BOSS\n\nA GAME FOR UDGJ\n\nBY BJORN RITZL\n\n\nPRESS ANY KEY"
-	label.set_text("#label", text)
-	timer.delay(0.3, true, function()
-		upper = not upper
-		if upper then
-			text = string.upper(text)
-		else
-			text = string.lower(text)
-		end
-		label.set_text("#label", text)
-	end)
+	utils.udgj_label("#label", "SWORD BOSS\n\nA GAME FOR UDGJ\n\nBY BJORN RITZL\n\n\nPRESS ANY KEY")
 	msg.post(".", "acquire_input_focus")
 end
 

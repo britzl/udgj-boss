@@ -1,21 +1,96 @@
 local monarch = require "monarch.monarch"
+local bosses = require "game.boss.bosses"
+
+
+local LEVELS = {
+	{
+		title = "THE BEGINNING",
+		body = "It started at the edge of the swamp\n\n\nA sinister presence lurks in the foul waters\n\n\nKill it for fame and fortune!",
+		boss = bosses.BOSS1,
+	},
+	{
+		title = "FIRST KILL",
+		body = "Your blade sings and your appetite for death is awoken\n\n\nMore monsters wait deeper in the swamp\n\n\nFind them. Slay them.",
+		boss = bosses.BOSS2,
+	},
+	{
+		title = "SECOND KILL",
+		body = "What a rush! Your foes die by the dozen.\n\n\nYou hear something stir deeper in the swamp\n\n\nLet's proceed!",
+		boss = bosses.BOSS3,
+	},
+	{
+		title = "THIRD KILL",
+		body = "The enemies are getting stronger and harder to kill.\n\n\nYet you push deeper.\n\n\nIs there an end in sight?",
+		boss = bosses.BOSS3,
+	},
+	{
+		title = "LOSING COUNT",
+		body = "You are losing yourself in the fight and in the swamp.\n\n\nThere is no turning back now...",
+		boss = bosses.BOSS3,
+	},
+}
+
+
+local function create_boss(self, boss_id)
+	local props = {
+		[hash("/boss")] = { boss_id = boss_id }
+	}
+	local pos = vmath.vector3(0, 0, 2)
+	self.boss = collectionfactory.create("#bossfactory", pos, nil, props)
+	self.boss_url = self.boss[hash("/boss")]
+end
+
+local function load_level(self, level)
+	self.level = level
+	msg.post("#", "load_level", { level = level })
+end
+
+local function send_to_player(message_id, message)
+	msg.post("/player/player", message_id, message or {})
+end
 
 function init(self)
 	--particlefx.play("rain")
 	local data = monarch.data("game")
-	local level = data and data.level or 1
-	local pos = vmath.vector3(0, 0, 2)
-	local props = {
-		[hash("/boss")] = { level = level }
-	}
-	self.boss = collectionfactory.create("#bossfactory", pos, nil, props)
+	load_level(self, data and data.level or 1)
+	msg.post("/sounds", "play", { sound = "music" })
 end
 
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash("boss_dead") then
-		local data = monarch.data("game")
-		local level = data and data.level or 1
-		monarch.show("game", { clear = true, reload = true }, { level = level + 1})
+	if message_id == hash("load_level") then
+		self.level = message.level
+		local level_config = LEVELS[self.level]
+		assert(level_config, "Missing level config")
+		create_boss(self, level_config.boss)
+		monarch.show("popup", nil, {
+			title = level_config.title,
+			body = level_config.body,
+			message_id = "start_level",
+		})
+	elseif message_id == hash("boss_dead") then
+		send_to_player("deactivate")
+		go.delete(self.boss_url, true)
+		if #LEVELS == self.level then
+			load_level(self, self.level)
+			--[[monarch.show("popup", nil, {
+				title = "VICTORY",
+				body = "The monsters are all dead\n\n\nand your thirst for blood is sated\n\n\nAt least for a little while...",
+				message_id = "show_menu",
+			})--]]
+		else
+			load_level(self, self.level + 1)
+		end
+	elseif message_id == hash("player_dead") then
+		monarch.show("popup", nil, {
+			title = "DEFEAT",
+			body = "The swamp has defeated yet another brave adventurer\n\n\nYour bones slowly sink down into the unmarked grave that is the swamp...",
+			message_id = "show_menu",
+		})
+	elseif message_id == hash("start_level") then
+		msg.post(self.boss_url, "start")
+		send_to_player("activate")
+	elseif message_id == hash("show_menu") then
+		monarch.back()
 	end
 end

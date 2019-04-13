@@ -5,8 +5,9 @@ go.property("angular_speed", 50)
 local mapper = require "in.mapper"
 local state = require "in.state"
 local camera = require "orthographic.camera"
-local utils = require "game.utils"
-local boss = require "game.bosses.boss"
+local boss = require "game.boss.boss"
+local sequence = require "ludobits.m.sequence"
+local util = require "ludobits.m.util"
 
 local STRAFE_LEFT = hash("strafe_left")
 local STRAFE_RIGHT = hash("strafe_right")
@@ -16,6 +17,8 @@ local ATTACK = hash("attack")
 
 local ZERO = vmath.vector3()
 
+local MAX_DISTANCE = 300
+
 local CAMERA = hash("/camera")
 
 local CAMERA_FOLLOW_OPTIONS = {
@@ -23,6 +26,24 @@ local CAMERA_FOLLOW_OPTIONS = {
 }
 
 local MAX_HEALTH = 10
+
+local function float(url, delay)
+	local pos = go.get_position(url)
+	go.animate(url, "position.y", go.PLAYBACK_LOOP_PINGPONG, pos.y + 3, go.EASING_INOUTQUAD, 1, delay)
+end
+
+
+local function blink(url, count, duration)
+	local delay = duration / count / 2
+	sequence.run_once(function()
+		for i=1,count do
+			msg.post(url, "disable")
+			sequence.delay(delay)
+			msg.post(url, "enable")
+			sequence.delay(delay)
+		end
+	end)
+end
 
 
 local function position(id, angle, distance)
@@ -42,6 +63,8 @@ local function attack(self)
 	go.animate(id, "position", go.PLAYBACK_ONCE_FORWARD, ZERO, go.EASING_INQUAD, dist / 600, 0, function()
 		go.delete(id)
 	end)
+	msg.post("/sounds", "play", { sound = "attack" })
+	
 end
 
 local function send_to_hud(message_id, message)
@@ -57,15 +80,21 @@ local function take_damage(self)
 	update_health(self, self.health - 1)
 	self.enabled = false
 	msg.post("#collisionobject", "disable")
-	utils.blink("helmet", 2, 0.4)
-	utils.blink("armor", 2, 0.4)
+	blink("helmet", 2, 0.4)
+	blink("armor", 2, 0.4)
 	camera.shake(CAMERA, 0.0025, 0.2)
 	local pos = go.get_position()
 	local angle = math.atan2(pos.y, pos.x)
 	local to = go.get_position() + vmath.vector3(math.cos(angle) * 40, math.sin(angle) * 40, 0)
 	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, to, go.EASING_OUTQUAD, 0.4, 0, function()
 		if self.health == 0 then
-			print("dead")
+			self.alive = false
+			go.animate("helmet", "position", go.PLAYBACK_ONCE_FORWARD, go.get_position("armor"), go.EASING_OUTBOUNCE, 0.75)
+			go.delete("armor")
+			go.delete("weapon")
+			timer.delay(1.5, false, function()
+				msg.post("/game", "player_dead")
+			end)
 		else
 			msg.post("#collisionobject", "enable")
 			self.enabled = true
@@ -77,8 +106,8 @@ function init(self)
 	msg.post(".", "acquire_input_focus")
 	ZERO.z = go.get_position().z
 	
-	utils.float("helmet", 0.1)
-	utils.float("armor", 0)
+	float("helmet", 0.1)
+	float("armor", 0)
 
 	mapper.bind(mapper.KEY_LEFT, STRAFE_LEFT, self.player_id)
 	mapper.bind(mapper.KEY_RIGHT, STRAFE_RIGHT, self.player_id)
@@ -87,17 +116,17 @@ function init(self)
 	mapper.bind(mapper.KEY_SPACE, ATTACK, self.player_id)
 
 	self.state = state.create()
-	self.enabled = true
-	update_health(self, 10)
+	self.enabled = false
+	self.alive = true
+	update_health(self, 1)
 end
 
 
 function update(self, dt)
-	if not self.enabled then return end
-	
+	if not self.alive then return end
 	local pos = go.get_position()
 	local angle = math.atan2(pos.y, pos.x)
-	
+
 	local function strafe(dir)
 		local dist = vmath.length(pos - ZERO)
 		local a = angle + (math.rad(self.angular_speed * dt) / (dist * 0.01)) * dir
@@ -108,17 +137,23 @@ function update(self, dt)
 	local function move(dir)
 		pos.x = pos.x - math.cos(angle) * self.linear_speed * dt * dir
 		pos.y = pos.y - math.sin(angle) * self.linear_speed * dt * dir
+		local max_cos = math.abs(math.cos(angle) * MAX_DISTANCE)
+		local max_sin = math.abs(math.sin(angle) * MAX_DISTANCE)
+		pos.x = util.clamp(pos.x, -max_cos, max_cos)
+		pos.y = util.clamp(pos.y, -max_sin, max_sin)
 	end
-		
-	if self.state.is_pressed(MOVE_FORWARD) then
-		move(1)
-	elseif self.state.is_pressed(MOVE_BACKWARD) then
-		move(-1)
-	end
-	if self.state.is_pressed(STRAFE_LEFT) then
-		strafe(-1)
-	elseif self.state.is_pressed(STRAFE_RIGHT) then
-		strafe(1)
+
+	if self.enabled then
+		if self.state.is_pressed(MOVE_FORWARD) then
+			move(1)
+		elseif self.state.is_pressed(MOVE_BACKWARD) then
+			move(-1)
+		end
+		if self.state.is_pressed(STRAFE_LEFT) then
+			strafe(-1)
+		elseif self.state.is_pressed(STRAFE_RIGHT) then
+			strafe(1)
+		end
 	end
 
 	-- adjust camera offset
@@ -145,6 +180,10 @@ function on_message(self, message_id, message, sender)
 			go.delete(message.other_id)
 			boss.OBJECT_DESTROYED.trigger(message.other_id)
 		end
+	elseif message_id == hash("deactivate") then
+		self.enabled = false
+	elseif message_id == hash("activate") then
+		self.enabled = true
 	end
 end
 
