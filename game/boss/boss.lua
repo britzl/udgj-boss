@@ -144,11 +144,7 @@ function M.create_wave(boss, factory_url, anim, count, distance, offset, fn)
 	M.OBJECT_DESTROYED.add(wave.on_object_destroyed)
 	wave.co = coroutine.create(function()
 		while true do
-			local ok, err = pcall(fn, wave)
-			if not ok then
-				print("Error running wave function", err)
-				break
-			end
+			fn(wave)
 		end
 	end)
 	boss.waves[#boss.waves + 1] = wave

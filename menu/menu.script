@@ -2,7 +2,7 @@ local monarch = require "monarch.monarch"
 local utils = require "swordboss.utils"
 
 function init(self)
-	utils.udgj_label("#label", "SWORD BOSS\n\nA GAME FOR UDGJ\n\nBY BJORN RITZL\n\n\nPRESS ANY KEY")
+	utils.udgj_label("#label", "SWORD BOSS\n\nA GAME FOR UDGJ\n\nBY BJORN RITZL\n\n\nARROWS TO MOVE\nSPACE TO FIRE")
 	msg.post(".", "acquire_input_focus")
 end
 

@@ -1,6 +1,6 @@
 [project]
 title = Sword Boss
-dependencies = https://github.com/britzl/defold-input/archive/1.5.3.zip,https://github.com/britzl/lumiere/archive/master.zip,https://github.com/britzl/defold-orthographic/archive/2.8.0.zip,https://github.com/britzl/monarch/archive/2.17.1.zip,https://github.com/britzl/ludobits/archive/6.4.0.zip
+dependencies = https://github.com/britzl/defold-input/archive/1.5.3.zip,https://github.com/britzl/defold-orthographic/archive/2.8.0.zip,https://github.com/britzl/monarch/archive/2.17.1.zip,https://github.com/britzl/ludobits/archive/6.4.0.zip
 custom_resources = 
 
 [bootstrap]
