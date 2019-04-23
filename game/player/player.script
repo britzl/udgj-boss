@@ -8,6 +8,7 @@ local camera = require "orthographic.camera"
 local boss = require "game.boss.boss"
 local sequence = require "ludobits.m.sequence"
 local util = require "ludobits.m.util"
+local events = require "game.events"
 
 local STRAFE_LEFT = hash("strafe_left")
 local STRAFE_RIGHT = hash("strafe_right")
@@ -76,7 +77,10 @@ local function update_health(self, health)
 	send_to_hud("player_health", { health = self.health, max = MAX_HEALTH })
 end
 
-local function take_damage(self)
+local function take_damage(self, pushback)
+	if not self.enabled then
+		return
+	end
 	update_health(self, self.health - 1)
 	self.enabled = false
 	msg.post("#collisionobject", "disable")
@@ -85,7 +89,10 @@ local function take_damage(self)
 	camera.shake(CAMERA, 0.0025, 0.2)
 	local pos = go.get_position()
 	local angle = math.atan2(pos.y, pos.x)
-	local to = go.get_position() + vmath.vector3(math.cos(angle) * 40, math.sin(angle) * 40, 0)
+	local to = go.get_position()
+	if pushback then
+		to = to + vmath.vector3(math.cos(angle) * 40, math.sin(angle) * 40, 0)
+	end
 	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, to, go.EASING_OUTQUAD, 0.4, 0, function()
 		if self.health == 0 then
 			self.alive = false
@@ -115,10 +122,18 @@ function init(self)
 	mapper.bind(mapper.KEY_DOWN, MOVE_BACKWARD, self.player_id)
 	mapper.bind(mapper.KEY_SPACE, ATTACK, self.player_id)
 
+	events.SHIELD_HIT.add()
+	events.BOSS_DEAD.add()
+	
 	self.state = state.create()
 	self.enabled = false
 	self.alive = true
-	update_health(self, 1)
+	update_health(self, 10)
+end
+
+function final(self)
+	events.SHIELD_HIT.remove()
+	events.BOSS_DEAD.remove()
 end
 
 
@@ -170,20 +185,26 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("collision_response") then
 		if message.group == hash("shield") then
-			take_damage(self)
+			take_damage(self, true)
 		elseif message.group == hash("enemy") then
-			take_damage(self)
+			take_damage(self, true)
 			go.delete(message.other_id)
-			boss.OBJECT_DESTROYED.trigger(message.other_id)
+			events.OBJECT_DESTROYED.trigger(message.other_id)
 		elseif message.group == hash("bullet") then
-			take_damage(self)
+			take_damage(self, true)
 			go.delete(message.other_id)
-			boss.OBJECT_DESTROYED.trigger(message.other_id)
+			events.OBJECT_DESTROYED.trigger(message.other_id)
 		end
 	elseif message_id == hash("deactivate") then
 		self.enabled = false
 	elseif message_id == hash("activate") then
 		self.enabled = true
+	elseif message_id == events.SHIELD_HIT.id then
+		take_damage(self, false)
+	elseif message_id == events.BOSS_DEAD.id then
+		self.state.clear()
+	else
+		print("unhandled", message_id)
 	end
 end
 

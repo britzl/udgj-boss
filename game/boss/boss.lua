@@ -1,9 +1,6 @@
-local signal = require "ludobits.m.signal"
+local events = require "game.events"
 
 local M = {}
-
-M.OBJECT_HIT = signal.create("OBJECT_HIT")
-M.OBJECT_DESTROYED = signal.create("OBJECT_DESTROYED")
 
 
 local function update_spawner(spawner)
@@ -17,13 +14,13 @@ local function update_wave(wave)
 end
 
 local function destroy_wave(boss, wave)
-	for i,w in pairs(boss.waves) do
+	for i,w in pairs(boss.waves or {}) do
 		if wave == w then
 			boss.waves[i] = nil
 			break
 		end
 	end
-	M.OBJECT_DESTROYED.remove(wave.on_object_destroyed)
+	events.OBJECT_DESTROYED.remove(wave.on_object_destroyed)
 	go.cancel_animations(wave.rotation, "property")
 	go.cancel_animations(wave.strafe, "property")
 	go.cancel_animations(wave.distance, "property")
@@ -141,7 +138,7 @@ function M.create_wave(boss, factory_url, anim, count, distance, offset, fn)
 	function wave.on_object_destroyed(id)
 		wave.objects[id] = nil
 	end
-	M.OBJECT_DESTROYED.add(wave.on_object_destroyed)
+	events.OBJECT_DESTROYED.add(wave.on_object_destroyed)
 	wave.co = coroutine.create(function()
 		while true do
 			fn(wave)
@@ -203,9 +200,5 @@ function M.animate_wave(wave, config, duration, delay)
 		coroutine.yield()
 	end
 end
-
-
-
-
 
 return M

@@ -2,6 +2,8 @@ go.property("boss_id", hash(""))
 
 local bosses = require "game.boss.bosses"
 local boss = require "game.boss.boss"
+local events = require "game.events"
+
 local MAX_HEALTH = 10
 
 local function send_to_hud(message_id, message)
@@ -13,6 +15,7 @@ local function update_health(self, boss)
 	if boss.health == 0 then
 		self.active = false
 		particlefx.play("#destroy")
+		events.BOSS_DEAD.trigger()
 		msg.post("head", "disable")
 		msg.post("#", "dead")
 	end
@@ -33,7 +36,6 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("collision_response") then
 		if message.group == hash("weapon") then
-			go.delete(message.other_id)
 			if self.boss.health > 0 then
 				particlefx.play("#hit")
 				self.boss.health = math.max(0, self.boss.health - 1)
