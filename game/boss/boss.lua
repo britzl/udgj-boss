@@ -14,7 +14,8 @@ local function update_wave(wave)
 end
 
 local function destroy_wave(boss, wave)
-	for i,w in pairs(boss.waves or {}) do
+	assert(boss.waves)
+	for i,w in pairs(boss.waves) do
 		if wave == w then
 			boss.waves[i] = nil
 			break

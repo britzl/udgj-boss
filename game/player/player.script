@@ -203,8 +203,6 @@ function on_message(self, message_id, message, sender)
 		take_damage(self, false)
 	elseif message_id == events.BOSS_DEAD.id then
 		self.state.clear()
-	else
-		print("unhandled", message_id)
 	end
 end
 
