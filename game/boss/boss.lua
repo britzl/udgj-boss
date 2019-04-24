@@ -155,7 +155,7 @@ function M.create_spawner(boss, interval, factory_url, anim, count, distance, of
 	spawner.timer_handle = timer.delay(interval, true, function(self, handle, time_elapsed)
 		local wave = M.create_wave(boss, factory_url, anim, count, distance, offset, function(wave)
 			fn(wave)
-			destroy_wave(wave)
+			destroy_wave(boss, wave)
 		end)
 	end)
 	boss.spawners[#boss.spawners + 1] = spawner
